@@ -67,13 +67,15 @@ class LineMesh(object):
             # create cylinder and apply transformations
             cylinder_segment = o3d.geometry.TriangleMesh.create_cylinder(
                 self.radius, line_length)
-            cylinder_segment = cylinder_segment.translate(
-                translation, relative=False)
+            # Rotate first (while cylinder is still at origin)
             if axis is not None:
                 axis_a = axis * angle
                 R = o3d.geometry.get_rotation_matrix_from_axis_angle(axis_a)
                 cylinder_segment = cylinder_segment.rotate(
-                    R, center=np.zeros([3, 1], dtype=np.float64))
+                    R, center=np.array([0.0, 0.0, 0.0]))
+            # Then translate to the midpoint of the line segment
+            cylinder_segment = cylinder_segment.translate(
+                translation, relative=False)
             # color cylinder
             color = self.colors if self.colors.ndim == 1 else self.colors[i, :]
             cylinder_segment.paint_uniform_color(color)
