@@ -175,19 +175,25 @@ git = "*"
 pkg-config = "*"
 open3d = ">=0.19.0,<0.20"
 scikit-learn = ">=1.8.0,<2"
+pcl = ">=1.15.1,<2"
 
 [tool.pixi.pypi-dependencies]
 teaserpp_python = { path = "." }
 
 [tool.pixi.tasks]
-configure = "cmake -B build -DBUILD_TESTING=ON -DBUILD_PYTHON_BINDINGS=ON"
+configure = "cmake -B build -DBUILD_TESTING=ON -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TEASER_FPFH=ON"
 cmake-build = { cmd = "cmake --build build -j", depends-on = ["configure"] }
+install = { cmd = "cmake --install build --prefix $CONDA_PREFIX", depends-on = ["cmake-build"] }
 test = { cmd = "cd build && ctest --output-on-failure", depends-on = ["cmake-build"] }
 lint = "ruff check ."
 format = "ruff format ."
 type-check = "basedpyright"
 teaser_python_3dsmooth = "cd examples/teaser_python_3dsmooth ; python teaser_python_3dsmooth.py"
 teaser_python_ply = "cd examples/teaser_python_ply/ ; python teaser_python_ply.py"
+teaser_cpp_ply_build = { cmd = "cd examples/teaser_cpp_ply && cmake -B build -DCMAKE_PREFIX_PATH=$CONDA_PREFIX && cmake --build build -j", depends-on = ["install"] }
+teaser_cpp_ply = { cmd = "cd examples/teaser_cpp_ply/build && ./teaser_cpp_ply", depends-on = ["teaser_cpp_ply_build"] }
+teaser_cpp_fpfh_build = { cmd = "cd examples/teaser_cpp_fpfh && cmake -B build -DCMAKE_PREFIX_PATH=$CONDA_PREFIX && cmake --build build -j", depends-on = ["install"] }
+teaser_cpp_fpfh = { cmd = "cd examples/teaser_cpp_fpfh/build && ./teaser_cpp_fpfh", depends-on = ["teaser_cpp_fpfh_build"] }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = ">=0.8.1"
